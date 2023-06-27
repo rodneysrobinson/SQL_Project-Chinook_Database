@@ -1,0 +1,86 @@
+1) What is the distribution of tracks sold by genre?
+
+SELECT 
+	G.Name AS Genre, 
+	COUNT(T.Trackid) AS "Number of Tracks Sold"
+FROM Track T
+JOIN Genre G
+ON T.Genreid = G.GenreId
+JOIN InvoiceLine IL
+ON T.TrackId = IL.TrackId
+GROUP BY G.Name
+ORDER BY "Number of Tracks Sold" DESC, G.Name
+
+
+2) What are the number of tracks sold by Jazz Artists?
+
+SELECT 
+	Ar.Name AS "Artist Name",  
+	COUNT(IL.Trackid) AS "Number of Tracks"
+FROM Artist Ar
+JOIN Album A
+ON Ar.ArtistId = A.ArtistId
+JOIN Track T
+ON A.AlbumId = T.AlbumId
+JOIN InvoiceLine IL
+ON T.TrackId = IL.TrackId
+JOIN Genre G
+ON T.GenreId = G.GenreId
+WHERE G.Name = 'Jazz'
+GROUP BY "Artist Name"
+ORDER BY "Number of Tracks" DESC, "Artist Name"
+
+
+3) What are the top 10 albums for number of distinct track titles sold?
+
+SELECT 
+	A.Title AS "Album Title",
+	COUNT(distinct(IL.Trackid)) AS "Number of Distinct Track Titles Sold"
+FROM Artist Ar
+JOIN Album A
+ON Ar.ArtistId = A.ArtistId
+JOIN Track T
+ON A.AlbumId = T.AlbumId
+JOIN InvoiceLine IL
+ON T.TrackId = IL.TrackId
+GROUP BY A.Title
+ORDER BY "Number of Distinct Track Titles Sold" DESC, A.Title
+LIMIT 10
+
+
+4) Who are the top 10 Rock customers by purchase amount?
+
+SELECT 
+	C.FirstName||' '||C.LastName AS "Customer Name", 
+	Sum(IL.Unitprice * IL.Quantity) AS "Purchase Total"
+FROM Customer C
+JOIN Invoice I
+ON C.CustomerId = I.CustomerId
+JOIN InvoiceLine IL
+ON I.InvoiceId = IL. InvoiceId
+JOIN Track T
+ON IL.TrackId = T.TrackId
+JOIN Genre G
+ON T.GenreId = G.GenreId
+Where G.Name = 'Rock'
+GROUP BY "Customer Name"
+ORDER BY "Purchase Total" DESC, "Customer Name"
+LIMIT 10
+
+
+5) What are the number of track sales and total sales revenue for each Sales Support Agent?
+
+SELECT 
+	E.FirstName||' '||E.LastName as "Sales Support Agent", 
+	COUNT(IL.Trackid) AS "Number of Tracks Sold",
+	ROUND(SUM(IL.Unitprice * IL.Quantity),2) As "Total Revenue"
+FROM Employee E
+JOIN Customer C
+ON E.EmployeeId = C.SupportRepId
+JOIN Invoice I
+ON C.CustomerId = I.CustomerId
+JOIN InvoiceLine IL
+ON I.InvoiceId = IL.InvoiceId
+WHERE E.Title = 'Sales Support Agent'
+GROUP BY "Sales Support Agent"
+ORDER BY "Total Revenue" DESC
